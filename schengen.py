@@ -33,14 +33,14 @@ class Visa:
         for days in range((exit - entry).days + 1):
             day = entry + timedelta(days=days)
             result = min(result, self.evaluate(day))
-        if result <= timedelta(0):
+        if result < timedelta(0):
             if strict:
                 del self._trips[-1]
                 raise VisaError(f"Trip could not be added because of overstay by {-result}")
             else:
                 warnings.warn(f"Overstay in the period from {entry} to {exit} by {-result}", OverstayWarning)
 
-    def evaluate(self, day: date):
+    def evaluate(self, day: date) -> timedelta:
         result = self._duration_of_stay
         for entry, exit in self._trips:
             if exit < (start := day - timedelta(days=180)):
@@ -55,9 +55,8 @@ class Visa:
             overstay = timedelta(days=1)
             for days in range((exit - entry).days + 1):
                 day = entry + timedelta(days=days)
-                if (tmp := self.evaluate(day)) <= timedelta(0):
-                    overstay = min(overstay, tmp)
-            if overstay <= timedelta(0):
+                overstay = min(overstay, self.evaluate(day))
+            if overstay < timedelta(0):
                 warnings.warn(f"Overstay in the period from {entry} to {exit} by {-overstay}", OverstayWarning)
                 return False
         return True
