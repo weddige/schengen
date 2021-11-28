@@ -43,7 +43,7 @@ class Visa:
     def evaluate(self, day: date) -> timedelta:
         result = self._duration_of_stay
         for entry, exit in self._trips:
-            if exit < (start := day - timedelta(days=180)):
+            if exit < (start := day - timedelta(days=179)):  # 180 days in the closed intervall start...day
                 pass
             else:
                 result -= min(exit, day) - max(entry, start) + timedelta(days=1)
